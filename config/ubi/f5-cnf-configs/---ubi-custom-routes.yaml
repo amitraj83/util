@@ -1,0 +1,21 @@
+apiVersion: "k8s.f5net.com/v1"
+kind: F5BigNetStaticroute
+metadata:
+  name: "subscriber-to-application"
+  namespace: "f5-cnf"
+spec:
+  destination: 10.22.0.0
+  prefixLen: 24
+  type: gateway
+  gateway: 10.222.0.1
+---
+apiVersion: "k8s.f5net.com/v1"
+kind: F5BigNetStaticroute
+metadata:
+  name: "application-to-subscriber"
+  namespace: "f5-cnf"
+spec:
+  destination: 10.11.0.0
+  prefixLen: 24
+  type: gateway
+  gateway: 10.111.0.1

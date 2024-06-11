@@ -1,0 +1,91 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nginx-macvlan
+spec:
+  selector:
+    matchLabels:
+      app: nginx-macvlan
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: nginx-macvlan
+      annotations:
+        k8s.v1.cni.cncf.io/networks: '[
+          { "name": "application" } ]'
+    spec:
+      containers:
+        - name: nginx-macvlan
+          image: ghcr.io/redhat-nfvpe/multus-service-demo:fedora-nginx
+          ports:
+            - containerPort: 80
+          imagePullPolicy: IfNotPresent
+          securityContext:
+            privileged: true
+          volumeMounts:
+            - name: nginx-data
+              mountPath: /usr/share/nginx/html
+            - name: nginx-conf
+              mountPath: /etc/nginx/nginx.conf
+              subPath: nginx.conf
+              readOnly: true
+      volumes:
+        - name: nginx-data
+          configMap:
+            name: nginx-data
+        - name: nginx-conf
+          configMap:
+            name: nginx-conf
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: nginx-data
+data:
+  index.html: |
+    <!DOCTYPE html>
+    <html>
+    <body>
+    Nginx
+    </body>
+    </html>
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: nginx-conf
+data:
+  nginx.conf: |
+    user nginx;
+    worker_processes  1;
+    events {
+      worker_connections 10240;
+    }
+    http {
+      server {
+        listen 80;
+        add_header Access-Control-Allow-Origin *;
+        location / {
+          default_type text/plain;
+          return 200 "Local Application v3$server_name\n$remote_addr:$remote_port-->$server_addr:$server_port\n";
+        }
+      }
+    }
+---
+
+apiVersion: v1
+kind: Pod
+metadata:
+  name: client-pod
+  annotations:
+    k8s.v1.cni.cncf.io/networks: '[
+            { "name" : "subscriber",
+              "interface": "macvlan1" }
+    ]'
+spec:
+  containers:
+  - name: pod-case-06
+    image: docker.io/centos/tools:latest
+    command:
+    - /sbin/init

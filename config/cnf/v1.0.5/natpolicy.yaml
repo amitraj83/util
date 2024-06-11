@@ -1,0 +1,30 @@
+apiVersion: "k8s.f5net.com/v1"
+kind: F5BigNatPolicy
+metadata:
+  name: "cnf-44-nat"
+spec:
+  sourceTranslation:
+    - name: "nat44-dynamic"
+      type: "dynamic-pat"
+      addresses:
+        - "10.222.0.128/29"
+      port: "8000-8050"
+      icmpEcho: true
+      proxyArp: true
+      mapping:
+        mode: "endpoint-independent-mapping"
+        timeout: 300
+      inbound:
+        eifTimeout: 90
+      routeAdvertisement: false
+  rule:
+    - name: dynamic-nat-44
+      ipProtocol: any
+      source:
+        addresses:
+          - "0.0.0.0/0"
+      destination:
+        addresses:
+          - "0.0.0.0/0"
+      sourceTranslation: "nat44-dynamic"
+

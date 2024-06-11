@@ -1,0 +1,29 @@
+apiVersion: "k8s.f5net.com/v1"
+kind: F5BigNetStaticroute
+metadata:
+  name: "app-route"
+spec:
+  destination: 10.1.230.0
+  prefixLen: 24
+  type: gateway
+  gateway: 10.1.210.80
+---
+apiVersion: "k8s.f5net.com/v1"
+kind: F5BigNetStaticroute
+metadata:
+  name: "client-route" # not required if ALH configured
+spec:
+  destination: 10.102.0.0
+  prefixLen: 17
+  type: gateway
+  gateway: 10.1.200.5
+---
+apiVersion: "k8s.f5net.com/v1"
+kind: F5BigNetStaticroute
+metadata:
+  name: "upf-route"
+spec:
+  destination: 10.1.160.0  # required?
+  prefixLen: 24
+  type: gateway
+  gateway: 10.1.160.5

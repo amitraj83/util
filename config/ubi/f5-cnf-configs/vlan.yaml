@@ -1,0 +1,23 @@
+apiVersion: "k8s.f5net.com/v1"
+kind: F5BigNetVlan
+metadata:
+  name: "subscriber"
+spec:
+  name: eth1
+  interfaces:
+    - "1.1"
+  selfip_v4s:
+    - "10.11.0.21"
+  prefixlen_v4: 24
+---
+apiVersion: "k8s.f5net.com/v1"
+kind: F5BigNetVlan
+metadata:
+  name: "application"
+spec:
+  name: eth2
+  interfaces:
+    - "1.2"
+  selfip_v4s:
+    - "10.22.0.21"
+  prefixlen_v4: 24

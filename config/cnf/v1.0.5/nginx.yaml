@@ -1,0 +1,98 @@
+apiVersion: "k8s.cni.cncf.io/v1"
+kind: NetworkAttachmentDefinition
+metadata:
+  name: nginx-net
+spec:
+  config: '{
+      "cniVersion": "0.3.1",
+      "type": "macvlan",
+      "master": "ens5",
+      "mode": "bridge",
+      "ipam": {
+        "type": "host-local",
+        "ranges": [
+          [
+            {
+              "subnet": "10.30.210.0/24",
+              "rangeStart": "10.30.210.80",
+              "rangeEnd": "10.30.210.80"
+            }
+          ]
+        ]
+      }
+    }'
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nginx-macvlan
+spec:
+  selector:
+    matchLabels:
+      app: nginx-macvlan
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: nginx-macvlan
+      annotations:
+        k8s.v1.cni.cncf.io/networks: '[
+            { "name": "nginx-net" } ]'
+    spec:
+      containers:
+      - name: nginx-macvlan
+        image: ghcr.io/redhat-nfvpe/multus-service-demo:fedora-nginx
+        ports:
+        - containerPort: 80
+        imagePullPolicy: IfNotPresent
+        securityContext:
+          privileged: true
+        volumeMounts: 
+        - name: nginx-data
+          mountPath: /usr/share/nginx/html
+        - name: nginx-conf
+          mountPath: /etc/nginx/nginx.conf
+          subPath: nginx.conf
+          readOnly: true
+      volumes:
+        - name: nginx-data
+          configMap:
+            name: nginx-data
+        - name: nginx-conf
+          configMap:
+            name: nginx-conf
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: nginx-data
+data:
+  index.html: |
+    <!DOCTYPE html>
+    <html>
+    <body>
+    Nginx
+    </body>
+    </html>
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: nginx-conf
+data:
+  nginx.conf: |
+    user nginx;
+    worker_processes  1;
+    events {
+      worker_connections 10240;
+    }
+    http {
+      server {
+        listen 80;
+        add_header Access-Control-Allow-Origin *;
+        location / {
+          default_type text/plain;
+          return 200 "Local Application v3$server_name\n$remote_addr:$remote_port-->$server_addr:$server_port\n";
+        }
+      }
+    }

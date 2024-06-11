@@ -1,0 +1,8 @@
+apiVersion: "k8s.f5net.com/v1"
+kind: F5BigContextSecure
+metadata:
+  name: cnf-context
+spec:
+  destinationAddress: 0.0.0.0/0
+    #  natPolicy: cnf-44-nat
+

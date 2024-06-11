@@ -1,0 +1,128 @@
+imageCredentials:
+  name: f5ingress-regsecret
+  registry: "registry.gitlab.com/etlawby/my-spk"
+  username: "gitlab+deploy-token-3693703"
+  password: "T3d7BTgxv9HgchX89k3a"
+  email: "a.bargery@f5.com"
+
+controller:
+  image:
+    repository: "registry.gitlab.com/etlawby/my-spk"
+  fluentbit_sidecar:
+    enabled: false
+
+afm:
+  enabled: true
+  fluentbit_sidecar:
+    enabled: false
+  pccd:
+    enabled: true
+    securityContext:
+      allowPrivilegeEscalation: true
+      runAsUser: 0
+    image:
+      repository: registry.gitlab.com/etlawby/my-spk
+
+tmm:
+  resources:
+    limits:
+      cpu: 1
+  prometheus:
+    create: false
+  hugepages:
+    enabled: false
+  image:
+    repository: "registry.gitlab.com/etlawby/my-spk"
+    pullPolicy: IfNotPresent
+
+  pod:
+    annotations:
+      k8s.v1.cni.cncf.io/networks: '[{
+        "name": "subscriber"
+      },
+      {
+        "name": "application"
+      }]'
+
+  customEnvVars:
+  - name: CONFIG_VIEWER_ENABLE
+    value: "TRUE"
+  - name: TMM_MAPRES_DELAY_MS
+    value: "6000"
+  - name: TMM_MAPRES_VERBOSITY
+    value: "debug"
+  - name: TMM_MAPRES_PREFER_SOCK
+    value: "TRUE"
+  - name: TMM_CALICO_ROUTER
+    value: "default"
+  - name: TMM_MAPRES_ADDL_VETHS_ON_DP
+    value: "TRUE"
+  - name: TMM_IGNORE_GATEWAYS 
+    value: "TRUE"
+#  - name: GRPC_USE_VAULT
+#    value: "FALSE"
+#  - name: SESSIONDB_EXTERNAL_STORAGE
+#    value: "FALSE"
+
+  k8sprobes:
+    enables: false
+
+  dynamicRouting:
+    enabled: true
+    tmmRouting:
+      image:
+        repository: "registry.gitlab.com/etlawby/my-spk"
+        pullPolicy: IfNotPresent
+      config:
+        bgp:
+          asn: 100
+          maxPathsEbgp: 4
+          maxPathsIbgp: 'null'
+          hostname: cnf-bgp
+          neighbors:
+          - ip: 10.1.200.5
+            asn: 200
+            ebgpMultihop: 10
+            acceptsIPv4: true
+            acceptsIPv6: true
+          - ip: 10.1.210.6
+            asn: 400
+            ebgpMultihop: 10
+            #        bfd:
+            #interface: external
+            #interval: 100
+            #minrx: 100
+            #multiplier: 3
+    tmrouted:
+      image:
+        repository: "registry.gitlab.com/etlawby/my-spk"
+        pullPolicy: IfNotPresent
+
+  service:
+    type: ClusterIP
+
+debug:
+  image:
+    repository: "registry.gitlab.com/etlawby/my-spk"
+    pullPolicy: IfNotPresent
+
+f5-toda-logging:
+  tmstats:
+    enabled: true
+    config:
+      image:
+        repository: "registry.gitlab.com/etlawby/my-spk"
+        pullPolicy: IfNotPresent
+  fluentd:
+    host: "localhost"
+  sidecar:
+    image:
+      repository: "registry.gitlab.com/etlawby/my-spk"
+      pullPolicy: IfNotPresent
+stats_collector:
+  enabled: true
+  image:
+    repository: "registry.gitlab.com/etlawby/my-spk"
+    pullPolicy: IfNotPresent
+
+

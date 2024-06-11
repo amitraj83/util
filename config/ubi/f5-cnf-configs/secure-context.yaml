@@ -1,0 +1,14 @@
+apiVersion: k8s.f5net.com/v1
+kind: F5BigContextSecure
+metadata:
+  name: cnf-secure-context
+  namespace: f5-cnf
+spec:
+  destinationAddress: "0.0.0.0/0"
+  destinationPort: 80
+  ipProtocol: any
+  natPolicy: cnf-nat-policy
+  vlans:
+    vlanList:
+      - subscriber
+      - application

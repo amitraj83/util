@@ -1,0 +1,30 @@
+---
+apiVersion: "k8s.f5net.com/v1"
+kind: F5BigDnsCache
+metadata:
+  name: "cnf-dnscache"
+spec:
+  cacheType: transparent
+  transparent:
+    localZones:
+      - name: example.com
+        zoneType: static
+        records:
+          - example.com. IN AAAA 2002::10:11:12:13
+---
+apiVersion: "dns.k8s.f5net.com/v1"
+kind: F5BigDnsApp
+metadata:
+  name: "cnf-dnsapp"
+spec:
+  destination:
+    address: "0.0.0.0"
+    port: 53
+  dns:
+    dnsCache: "cnf-dnscache"
+  snat:
+    type: "automap"
+  pool:
+    members:
+      - address: "8.8.8.8"
+      - address: "8.8.4.4"

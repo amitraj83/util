@@ -1,0 +1,53 @@
+apiVersion: k8s.f5net.com/v1
+kind: F5BigNatPolicy
+metadata:
+  name: cnf-nat-policy
+  namespace: f5-cnf
+spec:
+  sourceTranslation:
+    - name: translate-http
+      type: dynamic-pat
+      addresses:
+        - "10.22.0.100-10.22.0.110"
+      port: "8000-8500"
+      routeAdvertisement: true
+      icmpEcho: true
+      proxyArp: true
+      routeAdvertisement: true # is this BGP or grat-ARP?
+  rule:
+    - name: catchall
+      ipProtocol: any
+      source:
+        addresses:
+          - "0.0.0.0/0"
+      destination:
+        addresses:
+          - "0.0.0.0/0"
+      sourceTranslation: translate-http
+
+
+   # - name: rule-http
+    #   ipProtocol: tcp
+    #   source:
+    #     addresses:
+    #       - "10.11.0.0/24"
+    #   destination:
+    #     addresses:
+    #       - "10.22.0.0/24"
+    #     ports:
+    #       - "80"
+    #   sourceTranslation: translate-http
+    # - name: rule-http-2
+    #   ipProtocol: tcp
+    #   source:
+    #     addresses:
+    #       - "10.22.0.0/24"
+    #   destination:
+    #     addresses:
+    #       - "10.11.0.0/24"
+    #     ports:
+    #       - "80"
+    #   sourceTranslation: translate-http
+
+# inspecting the packets, I see that traffic flows from client to tmm pod,
+# they get reset, and dont go into the application pods interface

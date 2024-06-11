@@ -1,0 +1,9 @@
+apiVersion: "k8s.f5net.com/v1"
+kind: F5BigNetStaticroute
+metadata:
+  name: "default-route"
+spec:
+  destination: 0.0.0.0
+  prefixLen: 0
+  type: gateway
+  gateway: 10.222.0.254
